@@ -6,8 +6,12 @@
 //  Copyright © 2017年 None. All rights reserved.
 //
 
+// UI工具包
 import UIKit
+// @see https://blog.csdn.net/xoxo_x/article/details/76390775
+// 网络请求的开源库
 import Alamofire
+// 键盘监听
 import IQKeyboardManagerSwift
 
 @UIApplicationMain
@@ -15,14 +19,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     
+    // 延时加载reachability
     lazy var reachability: NetworkReachabilityManager? = {
+        // 实时监测与http://app.u17.com连接状况
         return NetworkReachabilityManager(host: "http://app.u17.com")
     }()
     
+    // 设置为竖屏显示
     var orientation: UIInterfaceOrientationMask = .portrait
     
-
-
+    // 应用加载完成时
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
         configBase()
@@ -37,23 +43,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
+    // 基本配置
     func configBase() {
+        // 开启键盘监听
         IQKeyboardManager.sharedManager().enable = true
+        // 点击背景收起键盘
         IQKeyboardManager.sharedManager().shouldResignOnTouchOutside = true
         
+        // 本地存储对象
         let defaults = UserDefaults.standard
         if defaults.value(forKey: String.sexTypeKey) == nil {
+            // 设置性别类型为1（1：男性,2:女性？）
             defaults.set(1, forKey: String.sexTypeKey)
+            // 保存数据
             defaults.synchronize()
         }
 
         reachability?.listener = { status in
             switch status {
+            // 使用蜂窝数据时
             case .reachable(.wwan):
+                // 通知显示
                 UNoticeBar(config: UNoticeBarConfig(title: "主人,检测到您正在使用移动数据")).show(duration: 2)
             default: break
             }
         }
+        // 开始监听
         reachability?.startListening()
     }
 
@@ -89,9 +104,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension UIApplication {
     class func changeOrientationTo(landscapeRight: Bool) {
         guard let delegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        // 横屏右转时
         if landscapeRight == true {
+            
+            // 代理的物理方向设置为右横屏
             delegate.orientation = .landscapeRight
+            // 为window设置支持的方向
             UIApplication.shared.supportedInterfaceOrientations(for: delegate.window)
+            // 设备设置为右横屏
             UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
         } else {
             delegate.orientation = .portrait
